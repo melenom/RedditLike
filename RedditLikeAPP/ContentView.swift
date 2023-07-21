@@ -12,26 +12,25 @@ private let sliderViewWidth = UIScreen.main.bounds.width * 0.75
 private let emptyViewWidth = UIScreen.main.bounds.width * 0.25
 
 struct ContentView: View {
-    
+    let model = NotifyModel()
     
     var body: some View {
         ZStack {
             SliderView()
             MainView()
-                
         }
+        .environmentObject(model)
     }
 }
 
 struct SliderView: View {
     var body: some View {
         HStack {
+            Slider()
+                .frame(width: sliderViewWidth)
+                .transition(.scale(0.4, anchor: .center))
             Rectangle()
                 .foregroundStyle(.blue)
-                .ignoresSafeArea()
-                .frame(width: sliderViewWidth)
-            Rectangle()
-                .foregroundStyle(.clear)
                 .frame(width:emptyViewWidth)
         }
     }
@@ -40,19 +39,14 @@ struct SliderView: View {
 struct MainView: View {
     @State private var isDragging = false
     @State private var direction: DragDirection = .unknow
-    @State private var action: DragAction = .hideSliderView
-    @State private var mainViewOffsetX: CGFloat = .zero
+    
+    
+    @EnvironmentObject private var notify: NotifyModel
     
     private enum DragDirection {
         case unknow
         case left, right
     }
-    
-    private enum DragAction {
-        case showSliderView
-        case hideSliderView
-    }
-    
     
     var drag: some Gesture {
         DragGesture()
@@ -61,42 +55,54 @@ struct MainView: View {
                 direction = w > 0 ? .right : .left
                 
                 let startPoint = g.startLocation
-                if action == .showSliderView && startPoint.x >= sliderViewWidth  && direction == .left {
+                if notify.showSlider && startPoint.x >= sliderViewWidth  && direction == .left {
                     
-                    mainViewOffsetX = sliderViewWidth - abs(w)
-                    mainViewOffsetX = mainViewOffsetX < 0 ? 0 : mainViewOffsetX
+                    notify.mainViewOffsetX = sliderViewWidth - abs(w)
+                    notify.mainViewOffsetX = notify.mainViewOffsetX < 0 ? 0 : notify.mainViewOffsetX
                 }
-                else if action == .hideSliderView && startPoint.x >= 0 && startPoint.x <= 30 && direction == .right{
-                    mainViewOffsetX = abs(w)
-                    mainViewOffsetX = mainViewOffsetX > sliderViewWidth ? sliderViewWidth : abs(w)
+                else if !notify.showSlider && startPoint.x >= 0 && startPoint.x <= 30 && direction == .right{
+                    notify.mainViewOffsetX = abs(w)
+                    notify.mainViewOffsetX = notify.mainViewOffsetX > sliderViewWidth ? sliderViewWidth : abs(w)
                 }
                 self.isDragging = true
             }
             .onEnded { _ in
                 self.isDragging = false
                 
-                if action == .showSliderView {
-                    mainViewOffsetX = mainViewOffsetX < screenWidth - 20 ? 0 : sliderViewWidth
-                    action = mainViewOffsetX < screenWidth - 20 ? .hideSliderView : .showSliderView
+                if notify.showSlider {
+                    notify.mainViewOffsetX = notify.mainViewOffsetX < screenWidth - 20 ? 0 : sliderViewWidth
+                    notify.showSlider = notify.mainViewOffsetX < screenWidth - 20 ? false : true
                 }
-                else if action == .hideSliderView {
-                    mainViewOffsetX = mainViewOffsetX >= 20 ? sliderViewWidth : 0
-                    action = mainViewOffsetX >= 20 ? .showSliderView : .hideSliderView
+                else if !notify.showSlider {
+                    notify.mainViewOffsetX = notify.mainViewOffsetX >= 20 ? sliderViewWidth : 0
+                    notify.showSlider = notify.mainViewOffsetX >= 20 ? true : false
                 }
             }
     }
     
     var body: some View {
-        Rectangle()
-            .foregroundStyle(.red)
-            .ignoresSafeArea()
-            .offset(x: mainViewOffsetX)
+        Main()
+            .offset(x: notify.mainViewOffsetX)
             .gesture(drag)
-            .animation(.easeInOut(duration: 0.1), value: mainViewOffsetX)
+            .animation(.easeInOut(duration: 0.1), value: notify.mainViewOffsetX)
     }
 }
 
-
+struct Slider: View {
+    var body: some View {
+        VStack {
+            List {
+                Text("celll")
+                Text("celll")
+                Text("celll")
+                Text("celll")
+                Text("celll")
+                Text("celll")
+            }
+        }
+        .background(Color.green)
+    }
+}
 
 #Preview {
     ContentView()

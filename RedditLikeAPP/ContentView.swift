@@ -24,15 +24,20 @@ struct ContentView: View {
 }
 
 struct SliderView: View {
+    
+    @EnvironmentObject var notifyModel: NotifyModel
+    
     var body: some View {
-        HStack {
-            Slider()
-                .frame(width: sliderViewWidth)
-                .transition(.scale(0.4, anchor: .center))
-            Rectangle()
-                .foregroundStyle(.blue)
-                .frame(width:emptyViewWidth)
+        VStack {
+            HStack {
+                Slider()
+                    .frame(width: sliderViewWidth)
+                Rectangle()
+                    .foregroundStyle(.white)
+                    .frame(width:emptyViewWidth)
+            }
         }
+        .ignoresSafeArea(.all)
     }
 }
 
@@ -40,7 +45,7 @@ struct MainView: View {
     @State private var isDragging = false
     @State private var direction: DragDirection = .unknow
     
-    
+    @GestureState var state = false
     @EnvironmentObject private var notify: NotifyModel
     
     private enum DragDirection {
@@ -49,7 +54,7 @@ struct MainView: View {
     }
     
     var drag: some Gesture {
-        DragGesture()
+        DragGesture(minimumDistance: 0)
             .onChanged { g in
                 let w = g.translation.width
                 direction = w > 0 ? .right : .left
@@ -66,7 +71,7 @@ struct MainView: View {
                 }
                 self.isDragging = true
             }
-            .onEnded { _ in
+            .onEnded { g in
                 self.isDragging = false
                 
                 if notify.showSlider {
@@ -89,21 +94,86 @@ struct MainView: View {
 }
 
 struct Slider: View {
+    @EnvironmentObject var notifyModel: NotifyModel
+    @State var expaned2: Bool = false
+    let const:CGFloat = 0.9
     var body: some View {
-        VStack {
-            List {
-                Text("celll")
-                Text("celll")
-                Text("celll")
-                Text("celll")
-                Text("celll")
-                Text("celll")
+        NavigationStack {
+            
+            VStack {
+                
+                List {
+                    
+                    Section {
+                        ForEach (0 ..< 5) {
+                            index in
+                            HStack {
+                                Image(systemName: "slider.horizontal.2.square")
+                                Text("celll")
+                                    .font(.callout)
+                                    .foregroundStyle(Color.black)
+                            }
+                            .listRowSeparator(.hidden)
+                        }
+                        
+                    } header: {
+                        HStack {
+                            Text("Recently Visted")
+                                .font(.callout)
+                                .foregroundStyle(Color.black)
+                            Text("See all")
+                                .foregroundStyle(Color.black)
+                                .font(.caption)
+                        }
+                    }
+                    
+                    
+                    Section(isExpanded: $expaned2) {
+                        ForEach (0 ..< 20) {
+                            index in
+                            HStack {
+                                Image(systemName: "sun.haze.fill")
+                                Text("celll")
+                                    .font(.callout)
+                                    .foregroundStyle(Color.black)
+                                Spacer()
+                                Image(systemName: "star")
+                            }
+                            .listRowSeparator(.hidden)
+                        }
+                        
+                    } header: {
+                        HStack {
+                            Text("Your Community")
+                                .font(.callout)
+                                .foregroundStyle(Color.black)
+                            Spacer()
+                           Image(systemName: "chevron.right")
+                                .rotationEffect(.degrees(expaned2 ? 90 : 0))
+                                .animation(.bouncy, value: expaned2)
+                        }
+                        .onTapGesture {
+                            expaned2.toggle()
+                        }
+                       
+                    }
+                }
+                .listStyle(.plain)
+                .scrollIndicators(.hidden)
+                .scaleEffect(
+                    .init(
+                        width: ( notifyModel.mainViewOffsetX / sliderViewWidth / 10 + const),
+                        height: ( notifyModel.mainViewOffsetX / sliderViewWidth / 10 + const)
+                    ),
+                    anchor: .center
+                )
             }
         }
-        .background(Color.green)
     }
 }
 
 #Preview {
     ContentView()
+//    Slider()
+//        .environmentObject(NotifyModel())
 }

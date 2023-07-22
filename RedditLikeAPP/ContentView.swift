@@ -25,9 +25,7 @@ struct ContentView: View {
 
 struct SliderView: View {
     
-    @EnvironmentObject var notifyModel: NotifyModel
-    
-    var body: some View {
+     var body: some View {
         VStack {
             HStack {
                 Slider()
@@ -54,7 +52,7 @@ struct MainView: View {
     }
     
     var drag: some Gesture {
-        DragGesture(minimumDistance: 0)
+        DragGesture(minimumDistance: 1)
             .onChanged { g in
                 let w = g.translation.width
                 direction = w > 0 ? .right : .left
@@ -160,13 +158,13 @@ struct Slider: View {
                 }
                 .listStyle(.plain)
                 .scrollIndicators(.hidden)
-                .scaleEffect(
-                    .init(
-                        width: ( notifyModel.mainViewOffsetX / sliderViewWidth / 10 + const),
-                        height: ( notifyModel.mainViewOffsetX / sliderViewWidth / 10 + const)
-                    ),
-                    anchor: .center
-                )
+                .animation(.easeInOut, body: { content in
+                    content.scaleEffect(
+                        x: ( notifyModel.mainViewOffsetX / sliderViewWidth / 10 + const),
+                        y: ( notifyModel.mainViewOffsetX / sliderViewWidth / 10 + const),
+                        anchor: .center)
+                })
+                
             }
         }
     }

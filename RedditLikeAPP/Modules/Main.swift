@@ -60,8 +60,6 @@ struct Main: View {
                         }
                 }
             }
-            //.navigationBarTitleDisplayMode(.inline)
-            //.navigationTitle("asd")
             .toolbar{
                 ToolbarItemGroup(placement: .topBarLeading) {
                     Button {
